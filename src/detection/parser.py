@@ -10,7 +10,6 @@ def extract_sender_info(sender_str: str) -> tuple[str, str, str]:
     - "Name <email@domain.com>"
     - "email@domain.com"
     """
-    # Regex for "Name <email>" format
     match = re.match(r"(.*)<(.+)>", sender_str)
     if match:
         display_name = match.group(1).strip().strip('"')

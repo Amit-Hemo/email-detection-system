@@ -28,15 +28,10 @@ def main():
             sys.exit(1)
 
         parsed = parse_email(email_input)
-        print(parsed)
         heuristics = analyze_heuristics(parsed)
         classification = classify_email(heuristics)
 
-        print(
-            json.dumps(
-                {"classification": classification, "heuristics": heuristics}, indent=2
-            )
-        )
+        print(json.dumps({"classification": classification}))
 
     except FileNotFoundError:
         print(f"Error: File '{file_path}' not found.")

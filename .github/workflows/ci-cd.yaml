@@ -7,7 +7,7 @@ on:
   pull_request:
 
 jobs:
-  test:
+  ci:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,8 +30,8 @@ jobs:
         run: uv run pytest
 
 
-  build-and-push:
-    needs: test
+  cd:
+    needs: ci
     runs-on: ubuntu-latest
 
     permissions:
@@ -62,3 +62,10 @@ jobs:
           owner_lower=$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')
           docker push ghcr.io/${owner_lower}/email-detection-system:latest
           docker push ghcr.io/${owner_lower}/email-detection-system:${GITHUB_SHA}
+
+      - name: Deploy
+        if: github.ref == 'refs/heads/main'
+        env:
+          deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          curl "$deploy_url"

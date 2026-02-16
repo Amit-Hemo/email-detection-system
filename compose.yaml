@@ -1,6 +1,6 @@
 services:
   server:
-    container_name: server
+    container_name: email-detection-system
     build:
       context: .
     ports:

@@ -36,3 +36,12 @@ class RuleResult(BaseModel):
     severity: Severity = Severity.LOW
     description: str
     triggered: bool
+
+
+class ModelResult(BaseModel):
+    classification: ClassificationType
+
+
+class ScanResult(BaseModel):
+    classification: ClassificationType
+    triggers: list[RuleResult] = Field(default_factory=list)

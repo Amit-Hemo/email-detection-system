@@ -3,9 +3,10 @@ import sys
 
 from pydantic import ValidationError
 
-from detection.classifier import classify_email
-from detection.heuristics import analyze_heuristics
-from detection.parser import parse_email
+from detection.detector import PhishingDetector
+from detection.heuristics import HeuristicModel
+from detection.parser import EmailParser
+from detection.resolver import SimpleResolver
 from models import EmailInput
 
 
@@ -20,18 +21,22 @@ def main():
         with open(file_path) as f:
             email_data = json.load(f)
 
-        # Validate input using Pydantic
         try:
             email_input = EmailInput(**email_data)
         except ValidationError as e:
             print(f"Error: Invalid email format. {e}")
             sys.exit(1)
 
-        parsed = parse_email(email_input)
-        heuristics = analyze_heuristics(parsed)
-        classification = classify_email(heuristics)
+        parser = EmailParser()
+        heuristics = HeuristicModel()
+        resolver = SimpleResolver()
+        detector = PhishingDetector(
+            parser=parser, models=[heuristics], resolver=resolver
+        )
 
-        print(json.dumps({"classification": classification}))
+        result = detector.scan(email_input)
+
+        print(json.dumps(result.model_dump(), indent=2))
 
     except FileNotFoundError:
         print(f"Error: File '{file_path}' not found.")

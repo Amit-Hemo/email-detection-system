@@ -31,3 +31,21 @@
 **/secrets.dev.yaml
 **/values.dev.yaml
 LICENSE
+
+/gmail_adds_on
+
+# Development & Agent Files
+.agent/
+.github/
+.pytest_cache/
+.ruff_cache/
+.vscode/
+.env*
+.python-version
+
+# Tests
+tests/
+
+# Configuration
+compose.yaml
+docker-compose.yaml

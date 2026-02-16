@@ -1,0 +1,7 @@
+services:
+  server:
+    container_name: server
+    build:
+      context: .
+    ports:
+      - 8000:8000

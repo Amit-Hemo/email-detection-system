@@ -51,12 +51,14 @@ jobs:
 
       - name: Build Docker image
         run: |
+          owner_lower=$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')
           docker build \
-            -t ghcr.io/${{ github.repository_owner }}/email-detection-system:latest \
-            -t ghcr.io/${{ github.repository_owner }}/email-detection-system:${{ github.sha }} \
+            -t ghcr.io/${owner_lower}/email-detection-system:latest \
+            -t ghcr.io/${owner_lower}/email-detection-system:${GITHUB_SHA} \
             .
 
       - name: Push Docker image
         run: |
-          docker push ghcr.io/${{ github.repository_owner }}/email-detection-system:latest
-          docker push ghcr.io/${{ github.repository_owner }}/email-detection-system:${{ github.sha }}
+          owner_lower=$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')
+          docker push ghcr.io/${owner_lower}/email-detection-system:latest
+          docker push ghcr.io/${owner_lower}/email-detection-system:${GITHUB_SHA}

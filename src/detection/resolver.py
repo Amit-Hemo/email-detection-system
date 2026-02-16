@@ -14,12 +14,14 @@ class SimpleResolver(Resolver):
             # Realistically should not happen if config is correct
             from models import ClassificationType
 
-            return ScanResult(classification=ClassificationType.SAFE)
+            return ScanResult(
+                classification=ClassificationType.SAFE, confidence_score=0
+            )
 
         # For now, just take the first heuristic result until we have more models
         primary_result = results[0]
 
         return ScanResult(
             classification=primary_result.classification,
-            triggers=[],
+            confidence_score=primary_result.confidence_score,
         )

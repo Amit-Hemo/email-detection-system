@@ -19,9 +19,9 @@ class ParsedEmail(BaseModel):
 
 
 class ClassificationType(StrEnum):
-    PHISHING = "Phishing"
-    SUSPICIOUS = "Suspicious"
     SAFE = "Safe"
+    SUSPICIOUS = "Suspicious"
+    PHISHING = "Phishing"
 
 
 class Severity(StrEnum):
@@ -40,8 +40,9 @@ class RuleResult(BaseModel):
 
 class ModelResult(BaseModel):
     classification: ClassificationType
+    confidence_score: float
 
 
 class ScanResult(BaseModel):
     classification: ClassificationType
-    triggers: list[RuleResult] = Field(default_factory=list)
+    confidence_score: float

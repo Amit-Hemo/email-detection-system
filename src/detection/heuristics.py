@@ -16,6 +16,8 @@ class HeuristicModel(DetectionModel):
     """
 
     def classify(self, email: ParsedEmail) -> ModelResult:
+        MAX_SCORE = 3.0
+
         rules = [
             self._check_suspicious_tld,
             self._check_ip_url,
@@ -26,33 +28,27 @@ class HeuristicModel(DetectionModel):
             self._check_multiple_links,
         ]
 
-        results = []
-        for rule in rules:
-            result = rule(email)
-            results.append(result)
+        results = [rule(email) for rule in rules]
 
-        classification = self._resolve_classification(results)
+        total_score = sum(result.score for result in results if result.triggered)
+        normalized_score = min(total_score / MAX_SCORE, 1.0)
 
-        return ModelResult(classification=classification)
+        classification = self._resolve_classification(normalized_score)
 
-    def _resolve_classification(self, results: list[RuleResult]) -> ClassificationType:
+        return ModelResult(
+            classification=classification, confidence_score=normalized_score
+        )
+
+    def _resolve_classification(self, score: float) -> ClassificationType:
         """
         Internal resolution logic for heuristics.
         """
-        high_severity_triggered = any(
-            r.triggered and r.severity == Severity.HIGH for r in results
-        )
-        medium_severity_count = sum(
-            1 for r in results if r.triggered and r.severity == Severity.MEDIUM
-        )
-
-        if high_severity_triggered:
+        if score >= 0.7:
             return ClassificationType.PHISHING
-
-        if medium_severity_count >= 2:
+        elif score >= 0.3:
             return ClassificationType.SUSPICIOUS
-
-        return ClassificationType.SAFE
+        else:
+            return ClassificationType.SAFE
 
     def _check_suspicious_tld(self, email: ParsedEmail) -> RuleResult:
         suspicious_tlds = {

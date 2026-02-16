@@ -22,27 +22,33 @@ def test_detector_safe(detector):
     result = detector.scan(email_input)
 
     assert result.classification == ClassificationType.SAFE
+    assert result.confidence_score == 0.0
 
 
 def test_detector_phishing(detector):
-    # High severity trigger: IP URL
+    # To hit Phishing (0.7) with MAX_SCORE=3.0, we need score >= 2.1
     email_input = EmailInput(
-        subject="Urgent",
-        sender="attacker@10.0.0.1",
-        body="Click here: http://10.0.0.1/login",
+        subject="URGENT ACTION",
+        sender="Paypal <security@paypal-secure.com> <attacker@evil.ru>",  # Mismatch+TLD
+        body="Click here: http://10.0.0.1/paypal-secure",  # IP URL+Pattern
     )
+    # Score: 1.0(TLD) + 1.0(Mismatch) + 1.0(IP) + 1.0(Pattern) + 0.3(Upper) = 4.3
+    # Normalized: min(4.3 / 3.0, 1.0) = 1.0
     result = detector.scan(email_input)
 
     assert result.classification == ClassificationType.PHISHING
+    assert result.confidence_score == 1.0
 
 
 def test_detector_suspicious(detector):
-    # 2 Medium triggers: Urgency + Uppercase Subject (assuming > 10 chars)
+    # To hit Suspicious (0.3) with MAX_SCORE=3.0, we need score >= 0.9
     email_input = EmailInput(
-        subject="URGENT ACTION REQUIRED NOW",
-        sender="store@example.com",
-        body="Please verify account immediately.",
+        subject="Action Required",
+        sender="Admin <admin@company.com> <attacker@evil.com>",
+        body="Please check your account settings now.",
     )
+    # Score: 1.0 (Mismatch) + 0.5 (Urgency) = 1.5 -> Normalized 0.5
     result = detector.scan(email_input)
 
     assert result.classification == ClassificationType.SUSPICIOUS
+    assert result.confidence_score == 0.5

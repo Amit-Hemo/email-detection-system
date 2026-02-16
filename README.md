@@ -28,7 +28,8 @@ You can try the Email Detection System directly in your Gmail without setting up
 7.  Open Gmail, click on any email, and you should see the **Email Detection System** blue box icon in the side panel.
 
 > [!IMPORTANT]
-> **Cold Start Delay**: The production API is hosted on Render's free tier. If the service hasn't been used recently, the first scan may take **30-60 seconds** to wake up the server. Subsequent scans will be nearly instantaneous. To avoid this, a background scheduled job is run every 14 minutes to keep the server warm. 
+> **Cold Start Delay**: The production API is hosted on Render's free tier. If the service hasn't been used recently, the first scan may take **30-60 seconds** to wake up the server. Subsequent scans will be nearly instantaneous. To avoid this, a background scheduled job is run every 14 minutes to keep the server warm.
+
 ---
 
 ## 🧠 How the Detection Model Works
@@ -53,9 +54,11 @@ The detection engine (`HeuristicModel`) evaluates emails based on several catego
 
 ### 4. Classification Logic
 
-- **Phishing**: Triggered by any **High Severity** rule failure.
-- **Suspicious**: Triggered by **2 or more Medium Severity** rule failures.
-- **Safe**: The default state when no significant threats are identified.
+The engine produces a **Confidence Score** normalized between `0.0` and `1.0` (where `1.0` is highest certainty) based on the cumulative weight of triggered rules.
+
+- **Phishing** (`PHISHING`): Confidence Score >= `0.7`.
+- **Suspicious** (`SUSPICIOUS`): `0.3` <= Confidence Score < `0.7`.
+- **Safe** (`SAFE`): Confidence Score < `0.3`.
 
 ---
 

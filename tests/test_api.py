@@ -22,21 +22,24 @@ def test_analyze_email_safe():
     assert response.status_code == 200
     data = response.json()
     assert data["classification"] == ClassificationType.SAFE
-    assert len(data["triggers"]) == 0
+    assert data["confidence_score"] == 0.0
 
 
 def test_analyze_email_phishing():
-    # Use a high severity trigger (IP URL)
+    # To get PHISHING (>= 0.7), we need score >= 2.1 (with MAX_SCORE=3.0)
     payload = {
-        "subject": "Urgent Action",
-        "sender": "security@bank.com",
-        "body": "Login here: http://10.0.0.1/verify",
+        "subject": "URGENT ACTION REQUIRED",  # Uppercase + Urgency
+        "sender": "attacker@evil.ru",  # Suspicious TLD
+        "body": "Click: http://1.1.1.1/paypal-secure now",  # IP URL + Pattern + Urgency
     }
+    # Total Score: 0.3 + 1.0 + 1.0 + 1.0 + 0.5 = 3.8
+    # Normalized: min(3.8 / 3.0, 1.0) = 1.0
+
     response = client.post("/api/v1/analyze", json=payload)
     assert response.status_code == 200
     data = response.json()
     assert data["classification"] == ClassificationType.PHISHING
-    assert len(data["triggers"]) == 0
+    assert data["confidence_score"] == 1.0
 
 
 def test_invalid_input():

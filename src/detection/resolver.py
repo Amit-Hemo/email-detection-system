@@ -1,27 +1,55 @@
 from detection.interface import Resolver
-from models import ModelResult, ScanResult
+from models import ClassificationType, ModelResult, ModelType, ScanResult
 
 
-class SimpleResolver(Resolver):
+class HybridMLHeuristicResolver(Resolver):
     """
-    Simple implementation of a resolver that aggregates model results.
-    Currently, it just takes the classification from the first model (Heuristic).
-    In the future, it can implement voting logic (e.g. Heuristic vs ML).
+    Hybrid resolver that combines heuristic and ML model results.
     """
 
     def resolve(self, results: list[ModelResult]) -> ScanResult:
-        if not results:
-            # Realistically should not happen if config is correct
-            from models import ClassificationType
+        """
+        Resolve the classification based on the model results.
+        """
+        heuristic_result = next(
+            r for r in results if r.model_type == ModelType.HEURISTIC
+        )
+        ml_result = next((r for r in results if r.model_type == ModelType.ML), None)
 
+        # ML model may be unavailable, so we fallback to heuristic result
+        if ml_result is None:
             return ScanResult(
-                classification=ClassificationType.SAFE, confidence_score=0
+                classification=heuristic_result.classification,
+                confidence_score=round(heuristic_result.confidence_score * 100, 2),
             )
 
-        # For now, just take the first heuristic result until we have more models
-        primary_result = results[0]
+        HARD_THRESHOLD = 0.9
+        if heuristic_result.confidence_score >= HARD_THRESHOLD:
+            return ScanResult(
+                classification=ClassificationType.PHISHING,
+                confidence_score=round(heuristic_result.confidence_score * 100, 2),
+            )
+
+        HEURISTIC_WEIGHT, ML_WEIGHT = 0.4, 0.6
+        combined_score = (
+            heuristic_result.confidence_score * HEURISTIC_WEIGHT
+            + ml_result.confidence_score * ML_WEIGHT
+        )
+
+        classification = self._resolve_classification(combined_score)
 
         return ScanResult(
-            classification=primary_result.classification,
-            confidence_score=primary_result.confidence_score,
+            classification=classification,
+            confidence_score=round(combined_score * 100, 2),
         )
+
+    def _resolve_classification(self, score: float) -> ClassificationType:
+        """
+        Internal resolution logic for hybrid resolver.
+        """
+        if score >= 0.75:
+            return ClassificationType.PHISHING
+        elif score >= 0.4:
+            return ClassificationType.SUSPICIOUS
+        else:
+            return ClassificationType.SAFE

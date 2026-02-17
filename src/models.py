@@ -30,6 +30,11 @@ class Severity(StrEnum):
     LOW = "Low"
 
 
+class ModelType(StrEnum):
+    HEURISTIC = "Heuristic"
+    ML = "ML"
+
+
 class RuleResult(BaseModel):
     rule_name: str
     score: float = 0.0
@@ -41,6 +46,7 @@ class RuleResult(BaseModel):
 class ModelResult(BaseModel):
     classification: ClassificationType
     confidence_score: float
+    model_type: ModelType
 
 
 class ScanResult(BaseModel):

@@ -4,6 +4,7 @@ from detection.interface import DetectionModel
 from models import (
     ClassificationType,
     ModelResult,
+    ModelType,
     ParsedEmail,
     RuleResult,
     Severity,
@@ -36,7 +37,9 @@ class HeuristicModel(DetectionModel):
         classification = self._resolve_classification(normalized_score)
 
         return ModelResult(
-            classification=classification, confidence_score=normalized_score
+            classification=classification,
+            confidence_score=normalized_score,
+            model_type=ModelType.HEURISTIC,
         )
 
     def _resolve_classification(self, score: float) -> ClassificationType:

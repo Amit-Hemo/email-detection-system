@@ -3,10 +3,11 @@ import sys
 
 from pydantic import ValidationError
 
+from detection.classifiers.heuristics import HeuristicModel
+from detection.classifiers.ml import MLModel
 from detection.detector import PhishingDetector
-from detection.heuristics import HeuristicModel
 from detection.parser import EmailParser
-from detection.resolver import SimpleResolver
+from detection.resolver import HybridMLHeuristicResolver
 from models import EmailInput
 
 
@@ -29,9 +30,10 @@ def main():
 
         parser = EmailParser()
         heuristics = HeuristicModel()
-        resolver = SimpleResolver()
+        ml = MLModel()
+        resolver = HybridMLHeuristicResolver()
         detector = PhishingDetector(
-            parser=parser, models=[heuristics], resolver=resolver
+            parser=parser, models=[heuristics, ml], resolver=resolver
         )
 
         result = detector.scan(email_input)

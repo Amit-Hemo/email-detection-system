@@ -1,6 +1,6 @@
 import pytest
 
-from detection.heuristics import HeuristicModel
+from detection.classifiers.heuristics import HeuristicModel
 from models import ParsedEmail
 
 

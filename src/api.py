@@ -1,9 +1,10 @@
 from fastapi import FastAPI, HTTPException
 
+from detection.classifiers.heuristics import HeuristicModel
+from detection.classifiers.ml import MLModel
 from detection.detector import PhishingDetector
-from detection.heuristics import HeuristicModel
 from detection.parser import EmailParser
-from detection.resolver import SimpleResolver
+from detection.resolver import HybridMLHeuristicResolver
 from models import EmailInput, ScanResult
 
 app = FastAPI(
@@ -14,8 +15,11 @@ app = FastAPI(
 
 parser = EmailParser()
 heuristics = HeuristicModel()
-resolver = SimpleResolver()
-detector = PhishingDetector(parser=parser, models=[heuristics], resolver=resolver)
+ml_model = MLModel()
+resolver = HybridMLHeuristicResolver()
+detector = PhishingDetector(
+    parser=parser, models=[heuristics, ml_model], resolver=resolver
+)
 
 
 @app.post("/api/v1/analyze", response_model=ScanResult)

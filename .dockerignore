@@ -42,6 +42,8 @@ LICENSE
 .vscode/
 .env*
 .python-version
+/ml/notebooks/
+/ml/phishing_email.csv
 
 # Tests
 tests/

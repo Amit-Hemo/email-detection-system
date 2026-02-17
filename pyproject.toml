@@ -6,11 +6,15 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi[standard]>=0.129.0",
+    "joblib>=1.5.3",
+    "pandas>=3.0.0",
     "pydantic>=2.12.5",
+    "scikit-learn>=1.8.0",
 ]
 
 [dependency-groups]
 dev = [
+    "ipykernel>=7.2.0",
     "pytest>=8.0.0",
     "ruff>=0.15.1",
 ]
@@ -30,6 +34,7 @@ addopts = "-v"
 [tool.ruff]
 line-length = 88
 target-version = "py312"
+exclude = ["ml/notebooks"]
 
 [tool.ruff.lint]
 select = [

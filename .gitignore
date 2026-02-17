@@ -7,6 +7,6 @@ wheels/
 *.egg-info
 .agent/context
 .env
-
+*.csv
 # Virtual environments
 .venv

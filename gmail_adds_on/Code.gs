@@ -63,38 +63,40 @@ function createResultCard(result) {
     SUSPICIOUS: 'Suspicious',
     PHISHING: 'Phishing',
   };
+
   var status = result.classification || 'Unknown';
+  var rawScore = result.confidence_score || 0;
+  var percentage = rawScore.toFixed(1) + '%';
+
   var color, description;
 
   if (status === LABEL.SAFE) {
     color = '#0f9d58'; // Green
-    description = 'Our heuristics suggest this email is safe to interact with.';
+    description = 'Our system analyzed this email and found no significant threats.';
   } else if (status === LABEL.SUSPICIOUS) {
-    color = '#f4b400'; // Orange/Yellow
-    description =
-      'Caution: This email contains unusual patterns. Do not click links.';
+    color = '#f4b400'; // Orange
+    description = 'Caution: This email has some red flags. Proceed with care.';
   } else if (status === LABEL.PHISHING) {
     color = '#db4437'; // Red
-    description = 'High Risk: This email matches known phishing signatures!';
-  } else {
-    color = '#000000'; //Black
-    description = 'Unknown Label,';
+    description = 'High Risk: This email strongly matches phishing patterns. Do not interact.';
   }
 
   var section = CardService.newCardSection()
     .addWidget(
       CardService.newDecoratedText()
-        .setTopLabel('Result')
-        .setText(
-          '<b><font color="' +
-          color +
-          '">' +
-          result.classification.toUpperCase() +
-          '</font></b>',
-        )
-        .setWrapText(false),
+        .setTopLabel('Detection Verdict')
+        .setText('<b><font color="' + color + '">' + status.toUpperCase() + '</font></b>')
+        .setWrapText(false)
     )
-    .addWidget(CardService.newTextParagraph().setText(description));
+    .addWidget(
+      CardService.newDecoratedText()
+        .setTopLabel('AI Risk Probability')
+        .setText('<b>' + percentage + '</b>')
+        .setBottomLabel('Likelihood of this email being a phishing attempt')
+        .setEndIcon(CardService.newIconImage().setIcon(CardService.Icon.STAR))
+    )
+    .addWidget(CardService.newDivider())
+    .addWidget(CardService.newTextParagraph().setText('<i>' + description + '</i>'));
 
   return CardService.newCardBuilder()
     .setHeader(header)

@@ -24,14 +24,14 @@ RUN chown -R nonroot:nonroot /app
 USER nonroot
 
 # Install the project's dependencies using the lockfile and settings
-RUN --mount=type=cache,target=/root/.cache/uv \
---mount=type=bind,source=uv.lock,target=uv.lock \
---mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-uv sync --locked --no-install-project
+RUN --mount=type=cache,target=/home/nonroot/.cache/uv,uid=999,gid=999 \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --locked --no-install-project
 
 COPY --chown=nonroot:nonroot . /app
-RUN --mount=type=cache,target=/root/.cache/uv \
-uv sync --locked
+RUN --mount=type=cache,target=/home/nonroot/.cache/uv,uid=999,gid=999 \
+    uv sync --locked
 
 # Place executables in the environment at the front of the path
 ENV PATH="/app/.venv/bin:$PATH"

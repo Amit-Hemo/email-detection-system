@@ -129,7 +129,7 @@ class HeuristicModel(DetectionModel):
             "suspended",
             "action required",
             "locked",
-            "now",
+            "act now",
         }
 
         body = email.normalized_body

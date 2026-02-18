@@ -39,10 +39,11 @@ function handleScanRequest(e) {
   };
 
   try {
-    var response = UrlFetchApp.fetch(
-      'https://email-detection-system-latest.onrender.com/api/v1/analyze',
-      options,
-    );
+    var apiUrl =
+      PropertiesService.getScriptProperties().getProperty('API_URL') ||
+      'https://email-detection-system-latest.onrender.com/api/v1/analyze';
+
+    var response = UrlFetchApp.fetch(apiUrl, options);
     var result = JSON.parse(response.getContentText());
     return CardService.newNavigation().pushCard(createResultCard(result));
   } catch (err) {
@@ -72,31 +73,44 @@ function createResultCard(result) {
 
   if (status === LABEL.SAFE) {
     color = '#0f9d58'; // Green
-    description = 'Our system analyzed this email and found no significant threats.';
+    description =
+      'Our system analyzed this email and found no significant threats.';
   } else if (status === LABEL.SUSPICIOUS) {
     color = '#f4b400'; // Orange
     description = 'Caution: This email has some red flags. Proceed with care.';
   } else if (status === LABEL.PHISHING) {
     color = '#db4437'; // Red
-    description = 'High Risk: This email strongly matches phishing patterns. Do not interact.';
+    description =
+      'High Risk: This email strongly matches phishing patterns. Do not interact.';
+  } else {
+    color = '#757575'; // Gray
+    description = 'Unable to determine the threat level. Please try again.';
   }
 
   var section = CardService.newCardSection()
     .addWidget(
       CardService.newDecoratedText()
         .setTopLabel('Detection Verdict')
-        .setText('<b><font color="' + color + '">' + status.toUpperCase() + '</font></b>')
-        .setWrapText(false)
+        .setText(
+          '<b><font color="' +
+            color +
+            '">' +
+            status.toUpperCase() +
+            '</font></b>',
+        )
+        .setWrapText(false),
     )
     .addWidget(
       CardService.newDecoratedText()
         .setTopLabel('AI Risk Probability')
         .setText('<b>' + percentage + '</b>')
         .setBottomLabel('Likelihood of this email being a phishing attempt')
-        .setEndIcon(CardService.newIconImage().setIcon(CardService.Icon.STAR))
+        .setEndIcon(CardService.newIconImage().setIcon(CardService.Icon.STAR)),
     )
     .addWidget(CardService.newDivider())
-    .addWidget(CardService.newTextParagraph().setText('<i>' + description + '</i>'));
+    .addWidget(
+      CardService.newTextParagraph().setText('<i>' + description + '</i>'),
+    );
 
   return CardService.newCardBuilder()
     .setHeader(header)

@@ -4,9 +4,9 @@ from pydantic import BaseModel, Field
 
 
 class EmailInput(BaseModel):
-    subject: str
-    sender: str
-    body: str
+    subject: str = Field(..., min_length=1, max_length=1000)
+    sender: str = Field(..., min_length=1, max_length=500)
+    body: str = Field(..., min_length=1, max_length=100_000)
 
 
 class ParsedEmail(BaseModel):

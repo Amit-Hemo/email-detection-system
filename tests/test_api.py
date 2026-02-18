@@ -1,18 +1,24 @@
+import pytest
 from fastapi.testclient import TestClient
 
 from api import app
 from models import ClassificationType
 
-client = TestClient(app)
+
+@pytest.fixture
+def client():
+    """Fixture to provide a TestClient with lifespan events triggered."""
+    with TestClient(app) as client:
+        yield client
 
 
-def test_health_check():
+def test_health_check(client):
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "healthy"}
 
 
-def test_analyze_email_safe():
+def test_analyze_email_safe(client):
     # Very clearly safe email - personal message with no suspicious indicators
     payload = {
         "subject": "Meeting tomorrow",
@@ -35,7 +41,7 @@ def test_analyze_email_safe():
     assert 0.0 <= data["confidence_score"] <= 100.0
 
 
-def test_analyze_email_phishing():
+def test_analyze_email_phishing(client):
     # Clearly phishing - multiple red flags will trigger hard threshold
     payload = {
         "subject": "URGENT ACTION REQUIRED",  # Uppercase + Urgency
@@ -52,7 +58,7 @@ def test_analyze_email_phishing():
     assert data["confidence_score"] >= 80.0
 
 
-def test_invalid_input():
+def test_invalid_input(client):
     # Missing required field 'body'
     payload = {"subject": "Incomplete", "sender": "oops@example.com"}
     response = client.post("/api/v1/analyze", json=payload)

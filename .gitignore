@@ -5,7 +5,7 @@ build/
 dist/
 wheels/
 *.egg-info
-.agent/context
+.agent/*
 .env
 *.csv
 # Virtual environments

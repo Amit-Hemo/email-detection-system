@@ -21,6 +21,8 @@ class PhishingDetector:
 
         all_results: list[ModelResult] = []
         for model in self._models:
-            all_results.append(model.classify(parsed_email))
+            result = model.classify(parsed_email)
+            if result is not None:
+                all_results.append(result)
 
         return self._resolver.resolve(all_results)

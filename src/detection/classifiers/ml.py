@@ -1,8 +1,12 @@
+import logging
+
 import joblib
 
 from detection.interface import DetectionModel
 from models import ClassificationType, ModelResult, ModelType, ParsedEmail
 from utils import get_project_root
+
+logger = logging.getLogger(__name__)
 
 FILE_NAME = "phishing_detector_v1.pkl"
 
@@ -12,8 +16,13 @@ class MLModel(DetectionModel):
         try:
             self._model_pipeline = joblib.load(get_project_root() / "ml" / FILE_NAME)
             self._available = True
+            logger.info("ML model loaded successfully from '%s'", FILE_NAME)
         except Exception:
             self._available = False
+            logger.warning(
+                "ML model unavailable — falling back to heuristics only",
+                exc_info=True,
+            )
 
     def classify(self, email: ParsedEmail) -> ModelResult | None:
         """

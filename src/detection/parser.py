@@ -48,7 +48,7 @@ class EmailParser:
         """
         Extracts URLs from text using regex.
         """
-        url_pattern = r"https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+[^\s]*"
+        url_pattern = r"https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+[^\s,;!?)\]>]*"
         return re.findall(url_pattern, text)
 
     def _normalize_text(self, text: str) -> str:

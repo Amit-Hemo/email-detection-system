@@ -12,8 +12,10 @@ class HybridMLHeuristicResolver(Resolver):
         Resolve the classification based on the model results.
         """
         heuristic_result = next(
-            r for r in results if r.model_type == ModelType.HEURISTIC
+            (r for r in results if r.model_type == ModelType.HEURISTIC), None
         )
+        if heuristic_result is None:
+            raise ValueError("Heuristic result is required for hybrid resolution")
         ml_result = next((r for r in results if r.model_type == ModelType.ML), None)
 
         # ML model may be unavailable, so we fallback to heuristic result

@@ -1,20 +1,5 @@
-import pytest
-
 from detection.classifiers.ml import MLModel
 from models import ClassificationType, ModelType, ParsedEmail
-
-
-@pytest.fixture
-def base_email():
-    """Base email for testing ML model."""
-    return ParsedEmail(
-        sender_email="test@example.com",
-        sender_domain="example.com",
-        display_name="Test User",
-        urls=[],
-        normalized_body="this is a normal email body",
-        subject="Normal Subject",
-    )
 
 
 class TestMLModelAvailability:
